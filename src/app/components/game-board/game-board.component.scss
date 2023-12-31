@@ -1,6 +1,27 @@
 .container{
-  display: flex;
+ margin-top: 3%;
+ display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 5px;
+  
+}
 
+.buttonClass{
+  margin: 5px;
+  margin: auto;
+ 
+}
+
+
+.btn.btn-primary{
+  margin-right: 5px;
+
+}
+
+.btn.btn-dark{
+  margin-left: 5px;
 }
 
 

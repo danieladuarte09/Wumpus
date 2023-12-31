@@ -1,9 +1,23 @@
 <div class="container">
+
+
+  <div class="alert alert-info" role="alert">
+    <p>Start playing by putting pressure on the player! and use de keyboard to move it.</p>
+    <p>Kill the wumpus pressing the space tab.</p>
+  </div>
+
+  <div class="container-perceptions"> 
+    <app-game-perceptions></app-game-perceptions>
+    <div *ngIf="showMessage"  class="alert alert-warning" role="alert">
+      You found the gold, now go back to the exit!
+    </div>
+  
+  </div>
     
   <div class="container-tabla"> 
 <table class="tabla" (keydown)="onKeyDown($event)" tabindex="0" >
     <tr *ngFor="let row of matrizGenerada; let rowIndex = index">
-      <td *ngFor="let cell of row; let colIndex = index" (click)="casillaClicada(rowIndex, colIndex)" [ngStyle]="{'width.px': 80, 'height.px': 80}" > 
+      <td *ngFor="let cell of row; let colIndex = index" [ngStyle]="{'width.px': 80, 'height.px': 80}" > 
         <ng-container *ngIf="cell !== 0">
           <ng-container *ngIf="cell !== 1 && cell !== 2 && cell !== 3; else imagenCasilla" >
             {{ cell }}
@@ -24,9 +38,19 @@
   </table>
 </div>
 
-<div class="container-perceptions"> 
-  <app-game-perceptions></app-game-perceptions>
+
+
+<div class="buttonClass">
+
+  <!--<button type="button" (click)="resetGame()" class="btn btn-primary">Reset</button>-->
+  <button type="button" [routerLink]="['/Welcome']" class="btn btn-secondary">Set new parameters</button>
+  <button type="button" class="btn btn-dark">Sheet</button>
+
 
 </div>
 
+
 </div>
+
+
+

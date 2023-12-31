@@ -4,6 +4,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { modalService } from '../../services/modal.service';
 import { GameBoardVariablesService } from '../../services/game-board-variables.service';
 import { GameConfigServiceService } from '../../services/game-config-service.service';
+import { InitialStructure } from '../../Models/initial-structure.model';
 
 @Component({
   selector: 'app-game-board',
@@ -11,31 +12,70 @@ import { GameConfigServiceService } from '../../services/game-config-service.ser
   styleUrl: './game-board.component.scss',
 })
 export class GameBoardComponent implements OnInit {
+
+  matrizGenerada: number[][] = [];
+  boardSizeInitial = 0
+  pitsInitial = 0
+  
   constructor(
     public ModalService: modalService,
     private gamePerceptionsService: GameBoardVariablesService,
     private gameConfigService: GameConfigServiceService
   ) {}
 
-  ngOnInit(): void {
-    this.casillaClicada(0, 0);
+ 
 
+  ngOnInit(): void {
     this.gameConfigService
       .getConfigObserver()
-      .subscribe((config) => console.log(config));
+      .subscribe((config: InitialStructure) => {
+        console.log('Información recibida del form:', config);
+
+        this.boardSizeInitial = config.boardSize
+        this.pitsInitial = config.numberOfPits
+        
+        this.matrizGenerada = this.generarMatrizAleatoria(config.boardSize, config.numberOfPits);
+
+        this.ModalService.resetGame.subscribe(() => {
+        
+          this.resetGame()
+          
+        });
+
+  
+      });
+  
   }
 
-  public wumpus: number = 1;
-  public gold: number = 2;
-  public hole: number = 3;
-  public wall: number = -1;
-  public exit: number = 4;
-  public HaveGold: boolean = false;
-  public GameStatusMessage: string = '';
-  public gamePerceptions: string = '';
-  public usuario: { fila: number; columna: number } = { fila: 0, columna: 0 };
-  public casillaSize: number = 50; //tamaño de la imagen cavernicola
+
+
+  resetGame(): void {
+    
+    //generamos nueva matriz
+    this.matrizGenerada = this.generarMatrizAleatoria(this.boardSizeInitial, this.pitsInitial);
+    //reiniciamos posicion inicial
+    this.usuario = { fila: 0, columna: 0 };
+    this.showMessage = false;
+
+  }
+
+  
+
+  gameConfig$: any;
+  wumpus: number = 1;
+   gold: number = 2;
+   hole: number = 3;
+   wall: number = -1;
+   exit: number = 4;
+   HaveGold: boolean = false;
+   GameStatusMessage: string = '';
+   gamePerceptions: string = '';
+  gameStructure: {} = {};
+   usuario: { fila: number; columna: number } = { fila: 0, columna: 0 };
+   casillaSize: number = 50; //tamaño de la imagen cavernicola
   arrowCount: number = 3;
+  showMessage = false;
+
 
   //recorremos la matriz
   IterarMatriz() {
@@ -43,6 +83,8 @@ export class GameBoardComponent implements OnInit {
       for (let y = 0; y < this.matrizGenerada[x].length; y++) {}
     }
   }
+
+
 
   obtenerCasillasAdyacentes(matriz: number[][], fila: number, columna: number) {
     const filas = matriz.length;
@@ -96,18 +138,16 @@ export class GameBoardComponent implements OnInit {
 
       case this.wall:
         break;
+
+     
     }
     return this.gamePerceptions;
   }
 
   //Cuando clicamos la casilla nos da un mensaje
-  casillaClicada(fila: number, columna: number) {
+  EvaluateAndUpdate(fila: number, columna: number) {
     let perceptions: string[] = [];
-    const casillas = this.obtenerCasillasAdyacentes(
-      this.matrizGenerada,
-      fila,
-      columna
-    );
+    const casillas = this.obtenerCasillasAdyacentes(this.matrizGenerada,fila,columna);
 
     perceptions[0] = this.evaluarCasilla(casillas.derecha);
     perceptions[1] = this.evaluarCasilla(casillas.izquierda);
@@ -118,6 +158,7 @@ export class GameBoardComponent implements OnInit {
     const noEmptyStrings = perceptions.filter((str) => str !== '');
     this.gamePerceptionsService.setModalState(noEmptyStrings.toString());
   }
+
 
   showModal(message: string): void {
     this.ModalService.openDialog(message);
@@ -133,14 +174,15 @@ export class GameBoardComponent implements OnInit {
     const valorCasillaActual =
       this.matrizGenerada[this.usuario.fila][this.usuario.columna];
     const casillaActual = this.matrizGenerada[fila][columna];
+
+ 
     //Verificamos si tiene el oro
     if (valorCasillaActual === 2) {
       console.log('¡Has encontrado el oro!');
       // Eliminamos el oro de la matriz (asignando 0 a la posición)
       this.matrizGenerada[fila][columna] = 0;
       this.HaveGold = true;
-      this.GameStatusMessage = '¡Has encontrado el oro!';
-      this.showModal(this.GameStatusMessage);
+      this.showMessage = true;
     }
 
     if (
@@ -165,69 +207,77 @@ export class GameBoardComponent implements OnInit {
     }
   }
 
+
   //Verificamos que los numeros 1,2 y 3 no aparezcan en la posición inicial del jugador x=0 y y=0
-  generarMatrizAleatoria(): number[][] {
+  generarMatrizAleatoria(gridSize:number, Pits:number): number[][] {
     const matriz: number[][] = [];
-    const numeros = [1, 2, 3, 3, 3];
+    const numeros = [1, 2]; //Wumpus y oro
 
     // Rellenar la matriz con ceros
-    for (let i = 0; i < 4; i++) {
-      matriz[i] = [0, 0, 0, 0, 0, 0, 0, 0, 0];
+    for (let i = 0; i < gridSize; i++) {
+      matriz[i] = Array(gridSize).fill(0);
     }
 
-    // Colocar los números en posiciones aleatorias
-    numeros.forEach((numero) => {
+    for (let i = 0; i < Pits + numeros.length; i++) {
       let fila, columna;
-
+    
       do {
-        fila = this.generarPosicionAleatorio(0, 3);
-        columna = this.generarPosicionAleatorio(0, 3);
+        fila = this.generarPosicionAleatorio(0, gridSize - 1);
+        columna = this.generarPosicionAleatorio(0, gridSize - 1);
       } while (
         matriz[fila][columna] !== 0 ||
         (fila === this.usuario.fila && columna === this.usuario.columna)
       );
+    
+      // Seleccionar el número según la iteración
+      //Durante cada iteración del bucle se coloca el número correcto (pozo, oro o wumpus) en una posición aleatoria de la matriz.
+      let numero;
+
+      if (i < Pits) {
+        numero = 3;
+      } else {
+        numero = numeros[i - Pits];
+      }
+    
 
       matriz[fila][columna] = numero;
-    });
-    //muestrame la matriz
-    console.log(matriz);
-
-    return matriz;
-  }
+    }
+    console.log('hola',matriz)
+  
+      return matriz;
+    }
 
   generarPosicionAleatorio(min: number, max: number): number {
     return Math.floor(Math.random() * (max - min + 1)) + min;
   }
 
-  // Uso de la función para generar una matriz
-  matrizGenerada = this.generarMatrizAleatoria();
+
 
   moverUsuario(direccion: string) {
     switch (direccion) {
       case 'arriba':
         if (this.usuario.fila > 0) {
           this.usuario.fila--;
-          this.casillaClicada(this.usuario.fila, this.usuario.columna);
+          this.EvaluateAndUpdate(this.usuario.fila, this.usuario.columna);
         }
         break;
       //verificamos si el usuario no esta en la última fila
       case 'abajo':
         if (this.usuario.fila < this.matrizGenerada.length - 1) {
           this.usuario.fila++;
-          this.casillaClicada(this.usuario.fila, this.usuario.columna);
-          
+          this.EvaluateAndUpdate(this.usuario.fila, this.usuario.columna);
         }
         break;
       case 'izquierda':
         if (this.usuario.columna > 0) {
           this.usuario.columna--;
-          this.casillaClicada(this.usuario.fila, this.usuario.columna);
+          this.EvaluateAndUpdate(this.usuario.fila, this.usuario.columna);
         }
         break;
       case 'derecha':
         if (this.usuario.columna < this.matrizGenerada[0].length - 1) {
           this.usuario.columna++;
-          this.casillaClicada(this.usuario.fila, this.usuario.columna);
+          this.EvaluateAndUpdate(this.usuario.fila, this.usuario.columna);
         }
         break;
     }
@@ -306,7 +356,20 @@ export class GameBoardComponent implements OnInit {
     }
   }
 
-  spinMovemnet(){
+  spinMovemnet() {}
 
+  FormsInformation() {
+    this.gameStructure = this.gameConfigService.getConfigObserver();
+    console.log('structure recieved:', this.gameStructure);
+    
   }
+
+  
+
+
+
+  
+    
+  
 }
+

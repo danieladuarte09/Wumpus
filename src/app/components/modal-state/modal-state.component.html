@@ -3,6 +3,6 @@
   <!-- Puedes mostrar contenido adicional aquí -->
 </mat-dialog-content>
 <mat-dialog-actions align="end">
-  <button mat-button mat-dialog-close>Cancel</button>
-  <button mat-button [mat-dialog-close]="true" cdkFocusInitial>Again</button>
+  <button [routerLink]="['/Welcome']" mat-button mat-dialog-close>End Game</button>
+  <button mat-button  (click)="resetGameButton()"  [mat-dialog-close]="true" cdkFocusInitial>Play Again</button>
 </mat-dialog-actions>

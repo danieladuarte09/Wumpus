@@ -7,7 +7,7 @@ import { InitialStructure } from '../Models/initial-structure.model';
 })
 export class GameConfigServiceService {
 
-  private gameConfig$: ReplaySubject<InitialStructure> = new ReplaySubject<InitialStructure>(1);
+  private gameConfig$:  ReplaySubject<InitialStructure> = new ReplaySubject<InitialStructure>(1);
 
   getConfigObserver(): Observable<InitialStructure> {
     return this.gameConfig$.asObservable();
@@ -16,5 +16,10 @@ export class GameConfigServiceService {
   updateConfig(config: InitialStructure) {
     this.gameConfig$.next(config);
   }
+
+  //getCurrentConfig(): InitialStructure {
+    //return this.gameConfig$.getValue();
+  //}
+
 
 }

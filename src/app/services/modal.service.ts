@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { EventEmitter, Injectable } from '@angular/core';
 import { BehaviorSubject, Observable } from "rxjs";
 import { ModalStateComponent } from '../components/modal-state/modal-state.component';
 import { MatDialog } from '@angular/material/dialog';
@@ -11,6 +11,8 @@ import { MatDialog } from '@angular/material/dialog';
 
   export class modalService {
     constructor(public dialog: MatDialog) {}
+
+    resetGame: EventEmitter<void> = new EventEmitter<void>();
 
   openDialog(message: string): void {
     const dialogRef = this.dialog.open(ModalStateComponent, {

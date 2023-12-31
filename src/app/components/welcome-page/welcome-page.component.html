@@ -1,60 +1,97 @@
-
 <div class="container">
-    <h1>Bienvenido al mundo de Wumpus</h1>
+  <h1>Bienvenido al mundo de Wumpus</h1>
 
-<h3><strong>Objetivo:</strong> Encontrar el oro y volver a la casilla de salida lo
-        más rápidamente posible ( vivo, claro¡¡)</h3>
-        
-        <div class="card" >
-          <div class="card-body">
-              <p><strong>Personaliza tu juego:</strong> </p>
-          
-              <form [formGroup]="formGroup">
+  <h3>
+    <strong>Objetivo:</strong> Encontrar el oro y volver a la casilla de salida
+    lo más rápidamente posible ( vivo, claro¡¡)
+  </h3>
 
-                <div class="mb-2" >
-                  <label for="arrowCount">
-                      Add the arrows:
-                  </label>
-                  <input formControlName="arrowCount" type="number" id="arrowCount" name="arrowCount"  placeholder="Ingresa las flechas" class="form-control" >
-                  
-                  <div class="alert alert-danger mt-2 " [hidden]="!formGroup.get('arrowCount')?.invalid || !formGroup.get('arrowCount')?.touched" >
-                      Min 1 - Max 3
-                  </div>
-              </div>
+  <div class="card">
+    <div class="card-body">
+      <p><strong>Personaliza tu juego:</strong></p>
 
-                <div class="mb-2">
-                <label for="boardSize">
-                   Grid Size:
-                </label>
-                <input formControlName="boardSize" type="number" id="boardSize" name="boardSize" placeholder="4,5,6..." class="form-control">
-              </div>
+      <form [formGroup]="formGroup">
 
-              <!--<div *ngIf="formGroup.get('boardSize')?.errors && formGroup.get('boardSize')?.dirty"> 
-                <p *ngIf="formGroup.get('boardSize')?.hasError('required')">Field is required</p>
-              </div>-->
-
-                <div class="alert alert-danger " *ngIf="formGroup.get('boardSize')?.errors && formGroup.get('boardSize')?.dirty"   >
-                  <p *ngIf="formGroup.get('boardSize')?.hasError('required')">Field is required</p>
-                  <p *ngIf="formGroup.get('boardSize')?.hasError('pattern')">min 4 - max 10 </p>
-                  
-                </div>
-                
-                <div class="mb-2">  
-                <label for="numberOfPits">Número de Pozos:</label>
-                <input formControlName="numberOfPits" type="number" id="numberOfPits" name="numberOfPits"   placeholder="2,3,4" class="form-control">
-              </div>
-              <div class="alert alert-danger mt-2"  [hidden]="!formGroup.get('numberOfPits')?.invalid || !formGroup.get('numberOfPits')?.touched">
-                Min 1 - Max 6
-              </div>
-              
-              </form>
-          
-              <button class="playbutton" mat-raised-button color="primary" (click)="onPlayClick()" [disabled]="!formGroup.valid" >PLAY</button>
-          </div>
+        <div class="mb-2">
+          <label for="boardSize"> Grid Size: </label>
+          <input
+            formControlName="boardSize"
+            type="number"
+            id="boardSize"
+            name="boardSize"
+            placeholder="4,5,6...10"
+            class="form-control"
+          />
         </div>
 
-          <!--(click)="playGame()"-->
+        <div
+          class="alert alert-danger"
+          *ngIf="
+            formGroup.get('boardSize')?.errors &&
+            formGroup.get('boardSize')?.dirty
+          "
+        >
+          <p *ngIf="formGroup.get('boardSize')?.hasError('required')">
+            Field is required
+          </p>
+          <p *ngIf="formGroup.get('boardSize')?.hasError('pattern')">
+            Only positive numbers are allowed, between 4 and 10
+          </p>
+          <p *ngIf="formGroup.get('boardSize')?.hasError('maxLength')">
+            Grid Size maximun 10
+          </p>
+        </div>
 
+        <div class="mb-2">
+          <label for="numberOfPits">Número de Pozos:</label>
+          <input
+            formControlName="numberOfPits"
+            type="number"
+            id="numberOfPits"
+            name="numberOfPits"
+            placeholder="2,3,4..."
+            class="form-control"
+          />
+        </div>
+        <div
+          class="alert alert-danger"
+          *ngIf="
+            formGroup.get('numberOfPits')?.errors &&
+            formGroup.get('numberOfPits')?.dirty
+          "
+        >
+          <p *ngIf="formGroup.get('numberOfPits')?.hasError('required')">
+            Field is required
+          </p>
+          <p *ngIf="formGroup.get('numberOfPits')?.hasError('pattern')">
+            Only positive numbers are allowed, between 3 and 10
+          </p>
+          <p *ngIf="formGroup.get('numberOfPits')?.hasError('maxLength')">
+            Arrows maximun 5
+          </p>
+          <p *ngIf="formGroup.dirty && formGroup.hasError('pitsError')">
+            {{ formGroup.getError('pitsError') }}
+          </p>
           
 
+        </div>
+      </form>
+
+      <button type="submit"
+      [routerLink]="['/Game']" routerLinkActive="router-link-active" 
+        class="playbutton"
+        mat-raised-button
+        color="primary"
+        (click)="onPlayClick()"
+        [disabled]="!formGroup.valid">
+        PLAY
+      </button>
+    </div>
   </div>
+
+  <div class="game" *ngIf="showGameBoard">
+
+   
+
+  </div>
+</div>

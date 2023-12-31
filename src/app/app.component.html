@@ -1,21 +1,6 @@
 <div class="container">
-
-  <ul ngbNav #nav="ngbNav" class="nav-tabs">
-    <li [ngbNavItem]="1">
-      <button ngbNavLink>Wumpus</button>
-      <ng-template ngbNavContent>
-        <app-welcome-page></app-welcome-page>
-      </ng-template>
-    </li>
-    <li [ngbNavItem]="2">
-      <button ngbNavLink>Game</button>
-      <ng-template ngbNavContent>
-        <app-game-board></app-game-board>
-      </ng-template>
-    </li>
-  </ul>
-  <div [ngbNavOutlet]="nav" class="mt-2"></div>
-
+  
+        <router-outlet></router-outlet>
   
 </div>
 

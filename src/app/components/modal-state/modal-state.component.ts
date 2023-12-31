@@ -1,5 +1,6 @@
-import { Component, Inject } from '@angular/core';
+import { Component, EventEmitter, Inject, Output } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { modalService } from '../../services/modal.service';
 
 
 @Component({
@@ -7,27 +8,25 @@ import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
   templateUrl: 'modal-state.component.html'
 })
 export class ModalStateComponent {
+
+  
   constructor(
+    private ModalService: modalService,
     public dialogRef: MatDialogRef<ModalStateComponent>,
     @Inject(MAT_DIALOG_DATA) public data: any
+
+
   ) {}
   
+  resetGameButton() {
+    // Emitir el evento de reinicio
+    this.ModalService.resetGame.emit();
+    // Cerrar el modal
+    this.dialogRef.close();
+    console.log('esto no hace nada')
+  }
 }
 
-/*export class ModalStateComponent  {
-  showModal: boolean = false;
 
-  constructor(public dialog: MatDialog) {}
-  //constructor(private modalService: ModalService) { }
-  //constructor(private dialog: MatDialog) { }
- /*
-  ngOnInit(): void {
-    // Suscribirse a los cambios en el servicio
-    this.modalService.modalObserver().subscribe((value: boolean) => {
-      this.showModal = value;
-    });
-
-  }
  
  
-}*/

@@ -12,6 +12,8 @@ import { MatDialogModule } from '@angular/material/dialog';
 import {MatButtonModule} from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { ReactiveFormsModule } from '@angular/forms';
+import { GameConfigServiceService } from './services/game-config-service.service';
+
 
 
 
@@ -23,6 +25,7 @@ import { ReactiveFormsModule } from '@angular/forms';
     ModalStateComponent,
     GameBoardComponent,
     GamePerceptionsComponent,
+    
 
   ],
   imports: [
@@ -35,7 +38,7 @@ import { ReactiveFormsModule } from '@angular/forms';
     MatCardModule,
     ReactiveFormsModule
   ],
-  providers: [],
+  providers: [GameConfigServiceService],
   bootstrap: [AppComponent]
 })
 export class AppModule { }
