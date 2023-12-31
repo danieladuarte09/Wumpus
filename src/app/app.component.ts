@@ -1,3 +1,4 @@
+import { Block } from '@angular/compiler';
 import { Component } from '@angular/core';
 
 @Component({
@@ -6,5 +7,18 @@ import { Component } from '@angular/core';
   styleUrl: './app.component.scss'
 })
 export class AppComponent {
-  title = 'Wumpus';
-}
+
+ 
+
+  constructor() {
+    
+  }
+
+  
+   
+
+
+} //close
+
+  
+

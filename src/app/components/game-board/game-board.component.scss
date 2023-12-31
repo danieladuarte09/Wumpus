@@ -1,0 +1,50 @@
+.container{
+  display: flex;
+
+}
+
+
+
+.tabla {
+    margin: auto;
+      border-collapse: collapse;
+      width: auto;
+      background-color: antiquewhite;
+      table-layout: fixed;
+      width: 200px;
+    
+    }
+
+    
+    .tabla td {
+      border: 1px solid #dddddd;
+      text-align: left;
+      padding: 8px;
+      z-index: 1; 
+      position: relative;
+      
+    }
+  
+    h1{
+      text-align: center;
+    }
+    .containerImageGame {
+      border: 0;
+      position: absolute;
+      top: 0;
+      left: 0;
+    }
+    
+    .containerImageCavernicola {
+      border: 0;
+      position: relative;
+      top: 0;
+      left: 0;
+      
+    }
+
+    .userImg{
+      transform: rotate (180deg)
+    }
+  
+  

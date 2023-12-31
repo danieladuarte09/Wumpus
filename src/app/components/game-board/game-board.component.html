@@ -1,0 +1,32 @@
+<div class="container">
+    
+  <div class="container-tabla"> 
+<table class="tabla" (keydown)="onKeyDown($event)" tabindex="0" >
+    <tr *ngFor="let row of matrizGenerada; let rowIndex = index">
+      <td *ngFor="let cell of row; let colIndex = index" (click)="casillaClicada(rowIndex, colIndex)" [ngStyle]="{'width.px': 80, 'height.px': 80}" > 
+        <ng-container *ngIf="cell !== 0">
+          <ng-container *ngIf="cell !== 1 && cell !== 2 && cell !== 3; else imagenCasilla" >
+            {{ cell }}
+          </ng-container>
+          <ng-template #imagenCasilla>
+            <div class="containerImageGame">
+              <img [src]="obtenerRutaImagen(cell)" alt="Casilla" width="50" height="50">
+            </div>
+            
+          </ng-template>
+        </ng-container>
+        <div class="containerImageCavernicola">
+          <img *ngIf="usuario.fila === rowIndex && usuario.columna === colIndex" class="userImg" src="assets/cavernicola.png" [ngStyle]="{'width.px': casillaSize, 'height.px': casillaSize } ">
+        </div>
+        
+      </td>
+    </tr>
+  </table>
+</div>
+
+<div class="container-perceptions"> 
+  <app-game-perceptions></app-game-perceptions>
+
+</div>
+
+</div>
