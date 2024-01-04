@@ -70,11 +70,12 @@ export class GameBoardComponent implements OnInit {
    HaveGold: boolean = false;
    GameStatusMessage: string = '';
    gamePerceptions: string = '';
-  gameStructure: {} = {};
+   gameStructure: {} = {};
    usuario: { fila: number; columna: number } = { fila: 0, columna: 0 };
    casillaSize: number = 50; //tamaño de la imagen cavernicola
-  arrowCount: number = 3;
-  showMessage = false;
+   arrowCount: number = 3;
+   showMessage = false;
+   rotationAngle = 0
 
 
   //recorremos la matriz
@@ -164,11 +165,7 @@ export class GameBoardComponent implements OnInit {
     this.ModalService.openDialog(message);
   }
 
-  /*showModal() {
-    this.modalService.setModalState(true);
-    console.log(true);
-    
-  }*/
+ 
 
   GameStatus(fila: number, columna: number) {
     const valorCasillaActual =
@@ -254,11 +251,13 @@ export class GameBoardComponent implements OnInit {
 
 
   moverUsuario(direccion: string) {
+   
     switch (direccion) {
       case 'arriba':
         if (this.usuario.fila > 0) {
           this.usuario.fila--;
           this.EvaluateAndUpdate(this.usuario.fila, this.usuario.columna);
+          this.rotationAngle = 270;
         }
         break;
       //verificamos si el usuario no esta en la última fila
@@ -266,23 +265,25 @@ export class GameBoardComponent implements OnInit {
         if (this.usuario.fila < this.matrizGenerada.length - 1) {
           this.usuario.fila++;
           this.EvaluateAndUpdate(this.usuario.fila, this.usuario.columna);
+          this.rotationAngle = 90;
         }
         break;
       case 'izquierda':
         if (this.usuario.columna > 0) {
           this.usuario.columna--;
           this.EvaluateAndUpdate(this.usuario.fila, this.usuario.columna);
+          this.rotationAngle = 180;
         }
         break;
       case 'derecha':
         if (this.usuario.columna < this.matrizGenerada[0].length - 1) {
           this.usuario.columna++;
           this.EvaluateAndUpdate(this.usuario.fila, this.usuario.columna);
+          this.rotationAngle = 0;
         }
         break;
     }
   }
-
   onKeyDown(event: KeyboardEvent) {
     switch (event.key) {
       case 'ArrowUp':
@@ -316,6 +317,9 @@ export class GameBoardComponent implements OnInit {
     }
   }
 
+
+  //Logica para lanzar flecha 
+  /*
   detectarWumpus(): boolean {
     const casillasAdyacentes = this.obtenerCasillasAdyacentes(
       this.matrizGenerada,
@@ -354,14 +358,35 @@ export class GameBoardComponent implements OnInit {
       this.GameStatusMessage = '¡Te has quedado sin flechas!';
       console.log('FLECHAS:', this.arrowCount);
     }
-  }
+  }*/
 
-  spinMovemnet() {}
 
   FormsInformation() {
     this.gameStructure = this.gameConfigService.getConfigObserver();
     console.log('structure recieved:', this.gameStructure);
     
+  }
+
+
+
+  spinMovemnet(event: KeyboardEvent) {
+    const rotationIncrement = 90;
+  
+    switch (event.key) {
+      case 'ArrowUp':
+        this.rotationAngle += rotationIncrement;
+        
+        break;
+      case 'ArrowDown':
+        
+        break;
+      case 'ArrowLeft':
+        
+        break;
+      case 'ArrowRight':
+        
+        break;
+    }
   }
 
   
