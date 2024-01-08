@@ -7,6 +7,7 @@ import { BehaviorSubject, Observable } from 'rxjs';
 export class GameBoardVariablesService {
   private game$: BehaviorSubject<string> = new BehaviorSubject<string>('');
   private arrow$: BehaviorSubject<number> = new BehaviorSubject<number>(3);
+  private arrowInformation$: BehaviorSubject<string> = new BehaviorSubject<string>('');
  
 
 
@@ -25,6 +26,14 @@ export class GameBoardVariablesService {
 
   setArrowState(value: number) {
     this.arrow$.next(value);
+  }
+
+  arrowInformationObserver():Observable<string> {
+    return this.arrowInformation$.asObservable()
+  }
+
+  setArrowInformationState(value: string) {
+    this.arrowInformation$.next(value);
   }
 
  

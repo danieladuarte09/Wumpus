@@ -18,7 +18,7 @@ export class ModalStateComponent {
 
   ) {}
   
-  resetGameButton() {
+  playGameButton() {
     // Emitir el evento de reinicio
     this.ModalService.resetGame.emit();
     // Cerrar el modal

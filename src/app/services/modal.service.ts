@@ -20,7 +20,7 @@ import { MatDialog } from '@angular/material/dialog';
     });
 
     dialogRef.afterClosed().subscribe((result: any) => {
-      console.log(`Dialog result: ${result}`);
+      //console.log(`Dialog result: ${result}`);
     });
   }
   }

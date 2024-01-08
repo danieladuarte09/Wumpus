@@ -1,6 +1,4 @@
 import { Component, Input, OnDestroy, OnInit } from '@angular/core';
-import {MatCardModule} from '@angular/material/card';
-import { GameBoardComponent } from '../game-board/game-board.component';
 import {GameBoardVariablesService} from '../../services/game-board-variables.service'
 import { Subscriber, Subscription, takeUntil } from 'rxjs';
 
@@ -13,23 +11,34 @@ export class GamePerceptionsComponent implements OnInit, OnDestroy{
 
   gamePerceptionsHijo: string | undefined = '';
   arrowCount: number = 0;
+  arrowInformation : string  = '';
+
   //destroy!: Subscription;
   private modalSubscription: Subscription | undefined;
-  private ArrowSubscription: Subscription | undefined
+  private ArrowSubscription: Subscription | undefined;
+  private arrowInformationSubscription:  Subscription | undefined;
 
-  constructor(private gamePerceptionsService: GameBoardVariablesService ){  }
+
+  constructor(private gameBoardVariablesService: GameBoardVariablesService ){  }
 
   ngOnInit(): void {    
-    this.modalSubscription =  this.gamePerceptionsService.modalObserver().subscribe(data=> {
+    this.modalSubscription =  this.gameBoardVariablesService.modalObserver().subscribe(data=> {
     console.log(data);
     this.gamePerceptionsHijo = data;
 
     });
 
-    this. ArrowSubscription = this.gamePerceptionsService.arrowObserver().subscribe((cantidad: number) => {
+    this.ArrowSubscription = this.gameBoardVariablesService.arrowObserver().subscribe((cantidad: number) => {
       this.arrowCount = cantidad;
     
   });
+
+  this.arrowInformationSubscription = this.gameBoardVariablesService.arrowInformationObserver().subscribe(data =>{
+    console.log('gameP componente:', data);
+    this.arrowInformation = data;
+    
+  });
+
 }
 
   ngOnDestroy(): void {
@@ -41,5 +50,10 @@ export class GamePerceptionsComponent implements OnInit, OnDestroy{
     if (this.ArrowSubscription) {
       this.ArrowSubscription.unsubscribe();
     }
+
+    if (this.arrowInformationSubscription) {
+      this.arrowInformationSubscription.unsubscribe();
+    }
+
   }
 }

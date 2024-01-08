@@ -7,6 +7,16 @@
         <div *ngIf="showMessage"  class="alert alert-warning" role="alert">
           You found the gold, now go back to the exit!
         </div>
+        
+    
+          <button type="button" (click)="resetGame()" class="btn btn-primary">Reset</button>
+          <button type="button" [routerLink]="['/Welcome']" class="btn btn-secondary">Set new parameters to play</button>
+          <button type="button" (click)="showImage = !showImage" class="btn btn-dark">Sheet</button>
+          <button type="button" (keydown)="throwArrows($event)" (click)="showArrowMessage = true"  [disabled]="!arrowButton" class="btn btn-danger"> Shoot </button>
+        </div>
+        <div *ngIf="showArrowMessage"  class="alert alert-danger" role="alert">
+          Select with the keyboard the direction to shoot</div>
+        <div class="buttonClass">
         </div>
 
       
@@ -16,46 +26,49 @@
     <div class="col">
 
       <div class="alert alert-info" role="alert">
-        <p>Start playing by putting pressure on the player! and use de keyboard to move it.</p>
-        <p>Kill the wumpus pressing the space tab.</p>
+        <h3>How to play?</h3>
+        <ul>
+          <li><b>To move the player press on it!</b></li>
+          <li>Use de keyboard to move it.</li>
+          <li>Shoot an Arrow to Kill the wumpus with the button.</li>
+        </ul>
+          
+        <h3>Perceptions</h3>
+        <ul>
+          <li>You feel a breeze; a pit is near.</li>
+          <li>You smell a stench; the wumpus is near.</li>
+          <li>You see a glitter; the gold is near.</li>
+        </ul>
+          
+          
       </div>
 
-      <div class="buttonClass">
-    
-        <button type="button" (click)="resetGame()" class="btn btn-primary">Reset</button>
-        <button type="button" [routerLink]="['/Welcome']" class="btn btn-secondary">Set new parameters to play</button>
-        <button type="button" class="btn btn-dark">Sheet</button>
-      
-      
-      </div>
-    
-     
-      
       </div>
         
       <div class="container-tabla"> 
-    <table class="tabla" (keydown)="onKeyDown($event)" tabindex="0" >
-        <tr *ngFor="let row of matrizGenerada; let rowIndex = index">
+    <table class="tabla" (keydown)="onKeyDown($event)"  tabindex="0" >
+        <tr *ngFor="let row of matrixGenerated; let rowIndex = index">
           <td *ngFor="let cell of row; let colIndex = index" [ngStyle]="{'width.px': 80, 'height.px': 80}" > 
+            <!--Si la casilla no es de valor 0 aparecera la imagen-->
             <ng-container *ngIf="cell !== 0">
-              <ng-container *ngIf="cell !== 1 && cell !== 2 && cell !== 3; else imagenCasilla" >
-                {{ cell }}
-              </ng-container>
-              <ng-template #imagenCasilla>
-                <div  class="containerImageGame">
-                  <img [src]="obtenerRutaImagen(cell)" alt="Casilla" width="50" height="50">
+
+              <div *ngIf="showImage" class="containerImageGame">
+                  <img [src]="getPathImage(cell)" alt="Casilla" width="50" height="50">
                 </div>
                 
-              </ng-template>
+                
             </ng-container>
             <div  [style.transform]="'rotate(' + rotationAngle + 'deg)'" class="containerImageCavernicola">
-              <img *ngIf="usuario.fila === rowIndex && usuario.columna === colIndex" class="userImg" src="assets/cavernicola.png" [ngStyle]="{'width.px': casillaSize, 'height.px': casillaSize } ">
+              <img *ngIf="user.row === rowIndex && user.column === colIndex" class="userImg" src="assets/cavernicola.png" [ngStyle]="{'width.px': BoxSize, 'height.px': BoxSize } ">
             </div>
             
           </td>
         </tr>
       </table>
-    </div>
+    
+
+    
+  </div>
    
      
     </div>

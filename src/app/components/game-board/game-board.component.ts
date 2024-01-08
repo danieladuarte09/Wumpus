@@ -1,6 +1,4 @@
-import { AfterViewInit, Component, OnInit, ViewChild } from '@angular/core';
-
-import { MatDialog } from '@angular/material/dialog';
+import { Component, OnInit } from '@angular/core';
 import { modalService } from '../../services/modal.service';
 import { GameBoardVariablesService } from '../../services/game-board-variables.service';
 import { GameConfigServiceService } from '../../services/game-config-service.service';
@@ -13,14 +11,34 @@ import { InitialStructure } from '../../Models/initial-structure.model';
 })
 export class GameBoardComponent implements OnInit {
 
-  matrizGenerada: number[][] = [];
+  //Initialized variables
+  matrixGenerated: number[][] = [];
   boardSizeInitial = 0
   pitsInitial = 0
+   gameConfig$: any;
+   wumpus: number = 1;
+   gold: number = 2;
+   hole: number = 3;
+   HaveGold: boolean = false;
+   GameStatusMessage: string = '';
+   gamePerceptions: string = '';
+   gamePerceptionsImage:string = '';
+   gameStructure: {} = {};
+   user: { row: number; column: number } = { row: 0, column: 0 };
+   BoxSize: number = 50; //cavernicola image size
+   arrowCountChild: number = 3;
+   showMessage = false;
+   rotationAngle = 0
+   arrowInformationChild = ''
+   showImage: boolean = false;
+   arrowButton: boolean = true;
+   showArrowMessage = false;
   
   constructor(
     public ModalService: modalService,
     private gamePerceptionsService: GameBoardVariablesService,
-    private gameConfigService: GameConfigServiceService
+    private gameConfigService: GameConfigServiceService,
+    
   ) {}
 
  
@@ -29,99 +47,83 @@ export class GameBoardComponent implements OnInit {
     this.gameConfigService
       .getConfigObserver()
       .subscribe((config: InitialStructure) => {
-        console.log('Información recibida del form:', config);
+        console.log('Information received from the form:', config);
 
         this.boardSizeInitial = config.boardSize
         this.pitsInitial = config.numberOfPits
-        
-        this.matrizGenerada = this.generarMatrizAleatoria(config.boardSize, config.numberOfPits);
+        this.matrixGenerated = this.generateRandomMatrix(config.boardSize, config.numberOfPits);
 
+        //Play Again modal button
         this.ModalService.resetGame.subscribe(() => {
-        
           this.resetGame()
-          
         });
-
-  
       });
-  
+
   }
 
 
 
   resetGame(): void {
     
-    //generamos nueva matriz
-    this.matrizGenerada = this.generarMatrizAleatoria(this.boardSizeInitial, this.pitsInitial);
-    //reiniciamos posicion inicial
-    this.usuario = { fila: 0, columna: 0 };
+    //new matrix is generated
+    this.matrixGenerated = this.generateRandomMatrix(this.boardSizeInitial, this.pitsInitial);
+    //reset initial position and other variables when the game is restarted
+    this.user = { row: 0, column: 0 };
     this.showMessage = false;
+    this.HaveGold = false;
+    this.gamePerceptionsService.setArrowState(this.arrowCountChild = 3 ) ;
+    this.gamePerceptionsService.setArrowInformationState(this.arrowInformationChild = '');
+    this.arrowButton = true;
+    this.showArrowMessage = false;
 
   }
 
   
-
-  gameConfig$: any;
-  wumpus: number = 1;
-   gold: number = 2;
-   hole: number = 3;
-   wall: number = -1;
-   exit: number = 4;
-   HaveGold: boolean = false;
-   GameStatusMessage: string = '';
-   gamePerceptions: string = '';
-   gameStructure: {} = {};
-   usuario: { fila: number; columna: number } = { fila: 0, columna: 0 };
-   casillaSize: number = 50; //tamaño de la imagen cavernicola
-   arrowCount: number = 3;
-   showMessage = false;
-   rotationAngle = 0
+   
 
 
   //recorremos la matriz
-  IterarMatriz() {
-    for (let x = 0; x < this.matrizGenerada.length; x++) {
-      for (let y = 0; y < this.matrizGenerada[x].length; y++) {}
+  IterateMatrix() {
+    for (let x = 0; x < this.matrixGenerated.length; x++) {
+      for (let y = 0; y < this.matrixGenerated[x].length; y++) {}
     }
   }
 
+  getAdjacentSquares(matrix: number[][], row: number, column: number) {
+    const filas = matrix.length;
+    const columnas = matrix[0].length;
 
-
-  obtenerCasillasAdyacentes(matriz: number[][], fila: number, columna: number) {
-    const filas = matriz.length;
-    const columnas = matriz[0].length;
-
-    const casillasAdyacentes: {
-      izquierda?: number;
-      arriba?: number;
-      derecha?: number;
-      abajo?: number;
+    const boxesAdjacent: {
+      left?: number;
+      up?: number;
+      right?: number;
+      down?: number;
     } = {};
 
-    // Casilla a la izquierda
-    if (columna > 0) {
-      casillasAdyacentes.izquierda = matriz[fila][columna - 1];
+    // Box on the left
+    if (column > 0) {
+      boxesAdjacent.left = matrix[row][column - 1];
     }
 
-    // Casilla arriba
-    if (fila > 0) {
-      casillasAdyacentes.arriba = matriz[fila - 1][columna];
+    // Top box
+    if (row > 0) {
+      boxesAdjacent.up = matrix[row - 1][column];
     }
 
-    // Casilla a la derecha
-    if (columna < columnas - 1) {
-      casillasAdyacentes.derecha = matriz[fila][columna + 1];
+    // Box on the right
+    if (column < columnas - 1) {
+      boxesAdjacent.right = matrix[row][column + 1];
     }
 
-    // Casilla abajo
-    if (fila < filas - 1) {
-      casillasAdyacentes.abajo = matriz[fila + 1][columna];
+    // Down box
+    if (row < filas - 1) {
+      boxesAdjacent.down = matrix[row + 1][column];
     }
 
-    return casillasAdyacentes;
+    return boxesAdjacent;
   }
 
-  evaluarCasilla(valor: number | undefined): string {
+  evaluateSquare(valor: number | undefined): string {
     this.gamePerceptions = '';
     switch (valor) {
       case this.hole:
@@ -130,36 +132,61 @@ export class GameBoardComponent implements OnInit {
 
       case this.gold:
         this.gamePerceptions = 'There is somethng shiny';
-        console.log('Game perceeptions:', this.gamePerceptions);
         break;
 
       case this.wumpus:
         this.gamePerceptions = 'It smells bad';
         break;
-
-      case this.wall:
-        break;
-
      
     }
     return this.gamePerceptions;
   }
 
-  //Cuando clicamos la casilla nos da un mensaje
-  EvaluateAndUpdate(fila: number, columna: number) {
-    let perceptions: string[] = [];
-    const casillas = this.obtenerCasillasAdyacentes(this.matrizGenerada,fila,columna);
+  /*perceptionImage(value: number| undefined): string {
+    this.gamePerceptionsImage = ''
+    switch (value) {
+    
+      case this.hole:
+        this.gamePerceptionsImage =  'assets/lavado-en-seco.png';
+        break;
+        
 
-    perceptions[0] = this.evaluarCasilla(casillas.derecha);
-    perceptions[1] = this.evaluarCasilla(casillas.izquierda);
-    perceptions[2] = this.evaluarCasilla(casillas.abajo);
-    perceptions[3] = this.evaluarCasilla(casillas.arriba);
-    this.GameStatus(fila, columna);
+      case this.gold:
+        this.gamePerceptionsImage ='assets/oro.png';
+        break;
+
+      case this.wumpus:
+        this.gamePerceptionsImage = 'assets/wumpus.png';
+        break;
+
+    }
+        
+          return this.gamePerceptionsImage;
+     
+  }*/
+
+
+
+  EvaluateAndUpdate(row: number, column: number) {
+    let perceptions: string[] = [];
+    const casillas = this.getAdjacentSquares(this.matrixGenerated,row,column);
+
+    perceptions[0] = this.evaluateSquare(casillas.right);
+    perceptions[1] = this.evaluateSquare(casillas.left);
+    perceptions[2] = this.evaluateSquare(casillas.down);
+    perceptions[3] = this.evaluateSquare(casillas.up);
+
+    //this.perceptionImage(casillas.derecha)
+    //console.log('PERCEPTIONIMAGE', this.perceptionImage(casillas.derecha));
+   
+    
+    this.GameStatus(row, column);
 
     const noEmptyStrings = perceptions.filter((str) => str !== '');
     this.gamePerceptionsService.setModalState(noEmptyStrings.toString());
   }
 
+       
 
   showModal(message: string): void {
     this.ModalService.openDialog(message);
@@ -167,38 +194,37 @@ export class GameBoardComponent implements OnInit {
 
  
 
-  GameStatus(fila: number, columna: number) {
-    const valorCasillaActual =
-      this.matrizGenerada[this.usuario.fila][this.usuario.columna];
-    const casillaActual = this.matrizGenerada[fila][columna];
+  GameStatus(row: number, column: number) {
+    const CurrentSquareValue = this.matrixGenerated[this.user.row][this.user.column];
+    const CurrentBox = this.matrixGenerated[row][column];
 
  
     //Verificamos si tiene el oro
-    if (valorCasillaActual === 2) {
+    if (CurrentSquareValue === 2) {
       console.log('¡Has encontrado el oro!');
       // Eliminamos el oro de la matriz (asignando 0 a la posición)
-      this.matrizGenerada[fila][columna] = 0;
+      this.matrixGenerated[row][column] = 0;
       this.HaveGold = true;
       this.showMessage = true;
     }
 
     if (
-      this.usuario.fila === 0 &&
-      this.usuario.columna === 0 &&
+      this.user.row === 0 &&
+      this.user.column === 0 &&
       this.HaveGold === true
     ) {
-      this.GameStatusMessage = '¡Has ganado!';
+      this.GameStatusMessage = 'You have won!';
       this.showModal(this.GameStatusMessage);
     }
 
-    if (casillaActual === this.wumpus) {
-      this.GameStatusMessage = 'Te ha pillado el WUMPUS. Fin del juego';
+    if (CurrentBox === this.wumpus) {
+      this.GameStatusMessage = 'You have been caught by the WUMPUS. End of game';
       console.log('message=', this.GameStatusMessage);
       this.showModal(this.GameStatusMessage);
     }
 
-    if (casillaActual === this.hole) {
-      this.GameStatusMessage = 'Ups! Has caído en un pozo. Fin del juego';
+    if (CurrentBox === this.hole) {
+      this.GameStatusMessage = 'Oops! You have fallen into a well. End of game';
       console.log('message=', this.GameStatusMessage);
       this.showModal(this.GameStatusMessage);
     }
@@ -206,7 +232,7 @@ export class GameBoardComponent implements OnInit {
 
 
   //Verificamos que los numeros 1,2 y 3 no aparezcan en la posición inicial del jugador x=0 y y=0
-  generarMatrizAleatoria(gridSize:number, Pits:number): number[][] {
+  generateRandomMatrix(gridSize:number, Pits:number): number[][] {
     const matriz: number[][] = [];
     const numeros = [1, 2]; //Wumpus y oro
 
@@ -223,7 +249,7 @@ export class GameBoardComponent implements OnInit {
         columna = this.generarPosicionAleatorio(0, gridSize - 1);
       } while (
         matriz[fila][columna] !== 0 ||
-        (fila === this.usuario.fila && columna === this.usuario.columna)
+        (fila === this.user.row && columna === this.user.column)
       );
     
       // Seleccionar el número según la iteración
@@ -254,38 +280,44 @@ export class GameBoardComponent implements OnInit {
    
     switch (direccion) {
       case 'arriba':
-        if (this.usuario.fila > 0) {
-          this.usuario.fila--;
-          this.EvaluateAndUpdate(this.usuario.fila, this.usuario.columna);
+        if (this.user.row > 0) {
+          this.user.row--;
+          this.EvaluateAndUpdate(this.user.row, this.user.column);
           this.rotationAngle = 270;
+          this.arrowButton = true;
         }
         break;
       //verificamos si el usuario no esta en la última fila
       case 'abajo':
-        if (this.usuario.fila < this.matrizGenerada.length - 1) {
-          this.usuario.fila++;
-          this.EvaluateAndUpdate(this.usuario.fila, this.usuario.columna);
+        if (this.user.row < this.matrixGenerated.length - 1) {
+          this.user.row++;
+          this.EvaluateAndUpdate(this.user.row, this.user.column);
           this.rotationAngle = 90;
+          this.arrowButton = true;
         }
         break;
       case 'izquierda':
-        if (this.usuario.columna > 0) {
-          this.usuario.columna--;
-          this.EvaluateAndUpdate(this.usuario.fila, this.usuario.columna);
+        if (this.user.column > 0) {
+          this.user.column--;
+          this.EvaluateAndUpdate(this.user.row, this.user.column);
           this.rotationAngle = 180;
+          this.arrowButton = true;
         }
         break;
       case 'derecha':
-        if (this.usuario.columna < this.matrizGenerada[0].length - 1) {
-          this.usuario.columna++;
-          this.EvaluateAndUpdate(this.usuario.fila, this.usuario.columna);
+        if (this.user.column < this.matrixGenerated[0].length - 1) {
+          this.user.column++;
+          this.EvaluateAndUpdate(this.user.row, this.user.column);
           this.rotationAngle = 0;
+          this.arrowButton = true;
         }
         break;
+
     }
   }
-  onKeyDown(event: KeyboardEvent) {
-    switch (event.key) {
+
+  onKeyDown(event: KeyboardEvent): void {
+    switch (event.code) {
       case 'ArrowUp':
         this.moverUsuario('arriba');
         break;
@@ -298,13 +330,16 @@ export class GameBoardComponent implements OnInit {
       case 'ArrowRight':
         this.moverUsuario('derecha');
         break;
+  
+      
     }
   }
 
-  obtenerRutaImagen(valorCasilla: number): string {
+
+
+  getPathImage(valorCasilla: number): string {
     switch (valorCasilla) {
-      case 0:
-        return 'assets/casilla-blanca.png';
+      
       case 1:
         return 'assets/wumpus.png';
       case 2:
@@ -318,83 +353,78 @@ export class GameBoardComponent implements OnInit {
   }
 
 
-  //Logica para lanzar flecha 
-  /*
-  detectarWumpus(): boolean {
-    const casillasAdyacentes = this.obtenerCasillasAdyacentes(
-      this.matrizGenerada,
-      this.usuario.fila,
-      this.usuario.columna
-    );
 
-    // Verifica si hay percepciones que indiquen la presencia del Wumpus (por ejemplo, un olor desagradable)
-    if (
-      this.evaluarCasilla(casillasAdyacentes.arriba) === 'It smells bad' ||
-      this.evaluarCasilla(casillasAdyacentes.abajo) === 'It smells bad' ||
-      this.evaluarCasilla(casillasAdyacentes.izquierda) === 'It smells bad' ||
-      this.evaluarCasilla(casillasAdyacentes.derecha) === 'It smells bad'
-    ) {
-      return true;
-    }
-
-    return false;
+  coordinatesValidator(matriz: number[][], fila: number, columna: number): boolean {
+    return fila >= 0 && fila < matriz.length && columna >= 0 && columna < matriz[fila].length;
   }
 
-  lanzarFlecha() {
-    if (this.arrowCount > 0) {
-      if (this.detectarWumpus()) {
-        // Lógica para indicar que el cazador ha acertado al Wumpus
-        this.GameStatusMessage = '¡Has derrotado al Wumpus con una flecha!';
-      } else {
-        // Lógica para indicar que el cazador ha lanzado una flecha, pero no ha alcanzado al Wumpus
-        this.GameStatusMessage =
-          '¡Has lanzado una flecha, pero no has acertado al Wumpus!';
-      }
-
-      // Resta una flecha
-      this.arrowCount--;
+  throwArrows(event: KeyboardEvent) {
+    const matriz = this.matrixGenerated
+    const direction = event.key;
+    
+    if (this.arrowCountChild > 0 ) {
+      
+      switch (direction) {
+        case 'ArrowUp':
+          if (this.user.row > 0 && matriz[this.user.row - 1][this.user.column] === 1 ) {
+            matriz[this.user.row - 1][this.user.column] = 0;
+            this.arrowInformationChild = 'You killed Wumpus ';
+          } else { 
+            this.arrowInformationChild = 'You have shot an arrow and missed the Wumpus!';
+            
+            
+          }
+          break;
+        case 'ArrowDown':
+          if (this.user.row < matriz.length - 1 && matriz[this.user.row + 1][this.user.column] === 1) {
+            matriz[this.user.row + 1][this.user.column] = 0;
+            this.arrowInformationChild = 'You killed Wumpus ';
+          } else { 
+            this.arrowInformationChild = 'You have shot an arrow and missed the Wumpus!';
+            
+            
+          }
+          break;
+        case 'ArrowLeft':
+          if (this.user.column > 0 && matriz[this.user.row][this.user.column - 1] === 1) {
+            matriz[this.user.row][this.user.column - 1] = 0;
+            this.arrowInformationChild = 'You killed Wumpus ';
+          } else { 
+            this.arrowInformationChild = 'You have shot an arrow and missed the Wumpus!';
+            
+            
+          }
+          
+          break;
+        case 'ArrowRight':
+          if (this.user.column < this.matrixGenerated[0].length - 1 && matriz[this.user.row][this.user.column + 1] ===1 ) {
+            matriz[this.user.row][this.user.column + 1] = 0;
+            this.arrowInformationChild = 'You killed Wumpus ';
+            
+          } else { 
+            this.arrowInformationChild = 'You have shot an arrow and missed the Wumpus!';
+           
+            
+          }
+          break;
+        default:
+          this.arrowInformationChild = 'Invalid direction';
+      } 
+       
+    //Restamos una flecha
+    this.gamePerceptionsService.setArrowState(this.arrowCountChild = this.arrowCountChild -1 ) 
+    this.showArrowMessage = false
     } else {
-      // Lógica para indicar que el cazador no tiene flechas disponibles
-      this.GameStatusMessage = '¡Te has quedado sin flechas!';
-      console.log('FLECHAS:', this.arrowCount);
+      this.arrowInformationChild = 'You have run out of available arrows ';
     }
-  }*/
-
-
-  FormsInformation() {
-    this.gameStructure = this.gameConfigService.getConfigObserver();
-    console.log('structure recieved:', this.gameStructure);
+    //Actualizamos información al usuario
+    this.gamePerceptionsService.setArrowInformationState(this.arrowInformationChild) 
+    this.arrowButton = false;
     
+   
   }
 
-
-
-  spinMovemnet(event: KeyboardEvent) {
-    const rotationIncrement = 90;
-  
-    switch (event.key) {
-      case 'ArrowUp':
-        this.rotationAngle += rotationIncrement;
-        
-        break;
-      case 'ArrowDown':
-        
-        break;
-      case 'ArrowLeft':
-        
-        break;
-      case 'ArrowRight':
-        
-        break;
-    }
-  }
-
-  
-
-
-
-  
-    
+ 
   
 }
 
