@@ -1,4 +1,5 @@
 # Wumpus
+The Wumpus World is a grid-based cave system where an agent, represented by the player, explores rooms to find gold while avoiding hazards.
 
 This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 17.0.3.
 
